@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Boop!</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #1a1a2e;
+      color: white;
+      overflow: hidden;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      height: 100dvh;
+      width: 100vw;
+    }
+
+    /* ── SCREENS ── */
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100dvh;
+      width: 100vw;
+      position: absolute;
+      top: 0; left: 0;
+    }
+    .screen.active { display: flex; }
+
+    /* ── MENU ── */
+    #menu-screen {
+      gap: 30px;
+    }
+    #menu-screen h1 {
+      font-size: 72px;
+      font-weight: 900;
+      letter-spacing: -2px;
+    }
+    #menu-screen h1 span {
+      color: #ff6b6b;
+    }
+    .subtitle {
+      font-size: 16px;
+      opacity: 0.5;
+      margin-top: -20px;
+    }
+    .btn {
+      background: #ff6b6b;
+      border: none;
+      color: white;
+      font-size: 24px;
+      font-weight: 700;
+      padding: 16px 48px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.1s;
+    }
+    .btn:active {
+      transform: scale(0.95);
+    }
+    .best-score {
+      font-size: 18px;
+      opacity: 0.6;
+    }
+
+    /* ── GAME ── */
+    #game-screen {
+      justify-content: flex-start;
+    }
+
+    .game-hud {
+      width: 100%;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+    .score-display {
+      font-size: 28px;
+      font-weight: 800;
+    }
+    .combo-display {
+      font-size: 18px;
+      font-weight: 600;
+      opacity: 0.7;
+    }
+
+    .target-zone {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding: 12px 0 20px;
+      z-index: 10;
+    }
+    .target-circle {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 4px solid rgba(255,255,255,0.3);
+      transition: background 0.15s;
+    }
+    .target-label {
+      font-size: 13px;
+      opacity: 0.4;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .game-area {
+      flex: 1;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.08s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .bubble:active {
+      transform: scale(0.85);
+    }
+
+    .lives {
+      display: flex;
+      gap: 6px;
+    }
+    .life-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ff6b6b;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .life-dot.lost {
+      opacity: 0.2;
+      transform: scale(0.6);
+    }
+
+    /* ── GAME OVER ── */
+    #gameover-screen {
+      gap: 24px;
+      background: rgba(26, 26, 46, 0.95);
+    }
+    .final-score-label {
+      font-size: 20px;
+      opacity: 0.6;
+    }
+    .final-score {
+      font-size: 80px;
+      font-weight: 900;
+      color: #ff6b6b;
+    }
+    .new-best {
+      font-size: 18px;
+      color: #ffd93d;
+      font-weight: 700;
+    }
+
+    /* ── EFFECTS ── */
+    .pop-effect {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: pop 0.4s ease-out forwards;
+    }
+    @keyframes pop {
+      0% { transform: scale(1); opacity: 0.6; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+
+    .miss-flash {
+      animation: flash-red 0.3s;
+    }
+    @keyframes flash-red {
+      0%, 100% { background: #1a1a2e; }
+      50% { background: #3a1a1a; }
+    }
+
+    .score-float {
+      position: absolute;
+      font-size: 24px;
+      font-weight: 800;
+      color: white;
+      pointer-events: none;
+      animation: float-up 0.6s ease-out forwards;
+      z-index: 100;
+    }
+    @keyframes float-up {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MENU -->
+  <div id="menu-screen" class="screen active">
+    <h1>Boop<span>!</span></h1>
+    <p class="subtitle">by Casoual Games</p>
+    <button class="btn" id="play-btn">Play</button>
+    <p class="best-score" id="menu-best"></p>
+  </div>
+
+  <!-- GAME -->
+  <div id="game-screen" class="screen">
+    <div class="game-hud">
+      <div class="score-display" id="score">0</div>
+      <div class="lives" id="lives"></div>
+    </div>
+    <div class="target-zone">
+      <div>
+        <div class="target-circle" id="target"></div>
+        <div class="target-label">TAP THIS COLOR</div>
+      </div>
+    </div>
+    <div class="combo-display" id="combo"></div>
+    <div class="game-area" id="game-area"></div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div id="gameover-screen" class="screen">
+    <p class="final-score-label">Score</p>
+    <p class="final-score" id="final-score">0</p>
+    <p class="new-best" id="new-best" style="display:none">NEW BEST!</p>
+    <button class="btn" id="retry-btn">Play Again</button>
+    <p class="best-score" id="gameover-best"></p>
+  </div>
+
+  <script>
+    // ── COLORS ──
+    const COLORS = [
+      { name: 'red',    hex: '#ff6b6b' },
+      { name: 'blue',   hex: '#4ecdc4' },
+      { name: 'yellow', hex: '#ffd93d' },
+      { name: 'purple', hex: '#a855f7' },
+      { name: 'green',  hex: '#22c55e' },
+      { name: 'orange', hex: '#ff922b' },
+    ];
+
+    // ── STATE ──
+    let score = 0;
+    let combo = 0;
+    let lives = 3;
+    let targetColor = null;
+    let bubbles = [];
+    let gameLoop = null;
+    let spawnLoop = null;
+    let speed = 1;
+    let gameActive = false;
+    let bestScore = parseInt(localStorage.getItem('boop-best') || '0');
+
+    // ── DOM ──
+    const $ = id => document.getElementById(id);
+    const screens = {
+      menu: $('menu-screen'),
+      game: $('game-screen'),
+      over: $('gameover-screen'),
+    };
+
+    function showScreen(name) {
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      screens[name].classList.add('active');
+    }
+
+    // ── MENU ──
+    function updateBestDisplay() {
+      const text = bestScore > 0 ? `Best: ${bestScore}` : '';
+      $('menu-best').textContent = text;
+      $('gameover-best').textContent = text;
+    }
+    updateBestDisplay();
+
+    $('play-btn').addEventListener('click', startGame);
+    $('retry-btn').addEventListener('click', startGame);
+
+    // ── GAME START ──
+    function startGame() {
+      score = 0;
+      combo = 0;
+      lives = 3;
+      speed = 1;
+      bubbles = [];
+      gameActive = true;
+
+      $('score').textContent = '0';
+      $('combo').textContent = '';
+      $('game-area').innerHTML = '';
+      renderLives();
+      pickNewTarget();
+      showScreen('game');
+
+      // Game loop — move bubbles
+      clearInterval(gameLoop);
+      gameLoop = setInterval(updateBubbles, 16);
+
+      // Spawn loop
+      clearInterval(spawnLoop);
+      scheduleSpawn();
+    }
+
+    function scheduleSpawn() {
+      const delay = Math.max(400, 1200 - score * 8);
+      spawnLoop = setTimeout(() => {
+        if (gameActive) {
+          spawnBubble();
+          scheduleSpawn();
+        }
+      }, delay);
+    }
+
+    // ── TARGET ──
+    function pickNewTarget() {
+      targetColor = COLORS[Math.floor(Math.random() * Math.min(3 + Math.floor(score / 15), COLORS.length))];
+      $('target').style.background = targetColor.hex;
+    }
+
+    // ── LIVES ──
+    function renderLives() {
+      const el = $('lives');
+      el.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'life-dot' + (i >= lives ? ' lost' : '');
+        el.appendChild(dot);
+      }
+    }
+
+    // ── SPAWN BUBBLE ──
+    function spawnBubble() {
+      if (!gameActive) return;
+      const area = $('game-area');
+      const rect = area.getBoundingClientRect();
+
+      const size = 50 + Math.random() * 20;
+      const color = COLORS[Math.floor(Math.random() * Math.min(3 + Math.floor(score / 15), COLORS.length))];
+      const x = Math.random() * (rect.width - size);
+
+      const el = document.createElement('div');
+      el.className = 'bubble';
+      el.style.width = size + 'px';
+      el.style.height = size + 'px';
+      el.style.background = color.hex;
+      el.style.left = x + 'px';
+      el.style.top = '-' + size + 'px';
+
+      const bubble = { el, color, y: -size, size, x, speed: (1.5 + Math.random()) * speed };
+
+      // Tap handler
+      el.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        tapBubble(bubble);
+      });
+
+      area.appendChild(el);
+      bubbles.push(bubble);
+    }
+
+    // ── TAP ──
+    function tapBubble(bubble) {
+      if (!gameActive) return;
+
+      if (bubble.color.name === targetColor.name) {
+        // Correct!
+        combo++;
+        const points = combo >= 10 ? 3 : combo >= 5 ? 2 : 1;
+        score += points;
+        $('score').textContent = score;
+        $('combo').textContent = combo >= 3 ? `${combo}x combo!` : '';
+
+        // Speed up
+        speed = 1 + score * 0.03;
+
+        // Effects
+        showPop(bubble);
+        showScoreFloat(bubble, '+' + points);
+
+        // Remove
+        removeBubble(bubble);
+        pickNewTarget();
+      } else {
+        // Wrong!
+        loseLife();
+        shakeBubble(bubble);
+      }
+    }
+
+    // ── MISS (bubble goes off screen) ──
+    function missBubble(bubble) {
+      if (bubble.color.name === targetColor.name) {
+        // Missed the target color — lose a life
+        loseLife();
+      }
+      removeBubble(bubble);
+    }
+
+    function loseLife() {
+      lives--;
+      combo = 0;
+      $('combo').textContent = '';
+      renderLives();
+      document.body.classList.add('miss-flash');
+      setTimeout(() => document.body.classList.remove('miss-flash'), 300);
+
+      if (lives <= 0) {
+        endGame();
+      }
+    }
+
+    // ── EFFECTS ──
+    function showPop(bubble) {
+      const area = $('game-area');
+      const pop = document.createElement('div');
+      pop.className = 'pop-effect';
+      pop.style.width = bubble.size + 'px';
+      pop.style.height = bubble.size + 'px';
+      pop.style.left = bubble.x + 'px';
+      pop.style.top = bubble.y + 'px';
+      pop.style.background = bubble.color.hex;
+      area.appendChild(pop);
+      setTimeout(() => pop.remove(), 400);
+    }
+
+    function showScoreFloat(bubble, text) {
+      const area = $('game-area');
+      const float = document.createElement('div');
+      float.className = 'score-float';
+      float.textContent = text;
+      float.style.left = (bubble.x + bubble.size / 2 - 15) + 'px';
+      float.style.top = bubble.y + 'px';
+      area.appendChild(float);
+      setTimeout(() => float.remove(), 600);
+    }
+
+    function shakeBubble(bubble) {
+      bubble.el.style.animation = 'none';
+      bubble.el.offsetHeight; // reflow
+      bubble.el.style.animation = 'shake 0.3s';
+    }
+
+    // ── UPDATE ──
+    function updateBubbles() {
+      if (!gameActive) return;
+      const area = $('game-area');
+      const areaHeight = area.getBoundingClientRect().height;
+
+      for (let i = bubbles.length - 1; i >= 0; i--) {
+        const b = bubbles[i];
+        b.y += b.speed;
+        b.el.style.top = b.y + 'px';
+
+        if (b.y > areaHeight) {
+          missBubble(b);
+        }
+      }
+    }
+
+    function removeBubble(bubble) {
+      bubble.el.remove();
+      bubbles = bubbles.filter(b => b !== bubble);
+    }
+
+    // ── GAME OVER ──
+    function endGame() {
+      gameActive = false;
+      clearInterval(gameLoop);
+      clearTimeout(spawnLoop);
+
+      const isNewBest = score > bestScore;
+      if (isNewBest) {
+        bestScore = score;
+        localStorage.setItem('boop-best', bestScore);
+      }
+
+      $('final-score').textContent = score;
+      $('new-best').style.display = isNewBest ? 'block' : 'none';
+      updateBestDisplay();
+
+      setTimeout(() => showScreen('over'), 500);
+    }
+
+    // Prevent scroll / zoom on mobile
+    document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+  </script>
+
+</body>
+</html>
