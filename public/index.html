@@ -134,7 +134,6 @@
     }
 
     .game-badge {
-      margin-left: auto;
       font-size: 12px;
       padding: 4px 10px;
       border-radius: 20px;
@@ -142,6 +141,45 @@
       color: #ff6b6b;
       font-weight: 600;
       flex-shrink: 0;
+    }
+
+    .game-right {
+      margin-left: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .vote-btn {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 6px 14px;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .vote-btn:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      color: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .vote-btn.voted {
+      border-color: #ff6b6b;
+      color: #ff6b6b;
+      background: rgba(255, 107, 107, 0.1);
+    }
+    .vote-count {
+      font-size: 11px;
+      opacity: 0.3;
     }
 
     .coming-soon {
@@ -180,24 +218,30 @@
 
     <p class="section-title">Our Games</p>
 
-    <div class="games">
-      <a href="https://boop.casoual.games" class="game-card">
+    <div class="games" id="games">
+      <div class="game-card" data-game="boop" data-href="https://boop.casoual.games">
         <div class="game-icon" style="background: linear-gradient(135deg, #ff6b6b, #a855f7);">B!</div>
         <div class="game-info">
           <h3>Boop!</h3>
           <p>Tap the right color. Stay alive.</p>
         </div>
-        <span class="game-badge">PLAY</span>
-      </a>
+        <div class="game-right">
+          <button class="vote-btn" onclick="event.stopPropagation(); vote('boop', this)">&#9825; <span class="vote-count" id="votes-boop">0</span></button>
+          <span class="game-badge">PLAY</span>
+        </div>
+      </div>
 
-      <a href="https://stack.casoual.games" class="game-card">
+      <div class="game-card" data-game="stack" data-href="https://stack.casoual.games">
         <div class="game-icon" style="background: linear-gradient(135deg, #4ecdc4, #22c55e);">S!</div>
         <div class="game-info">
           <h3>Stack!</h3>
           <p>Time your tap. Build the tower.</p>
         </div>
-        <span class="game-badge">PLAY</span>
-      </a>
+        <div class="game-right">
+          <button class="vote-btn" onclick="event.stopPropagation(); vote('stack', this)">&#9825; <span class="vote-count" id="votes-stack">0</span></button>
+          <span class="game-badge">PLAY</span>
+        </div>
+      </div>
 
       <div class="game-card coming-soon">
         <div class="game-icon" style="background: rgba(255,255,255,0.06);">?</div>
@@ -228,6 +272,67 @@
       dot.style.animationDuration = (8 + Math.random() * 12) + 's';
       dot.style.animationDelay = (Math.random() * 15) + 's';
       bg.appendChild(dot);
+    }
+
+    // ── CARD NAVIGATION ──
+    document.querySelectorAll('.game-card[data-href]').forEach(card => {
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', () => {
+        window.location.href = card.dataset.href;
+      });
+    });
+
+    // ── VOTING SYSTEM ──
+    const API = '/api/votes';
+    const votedGames = JSON.parse(localStorage.getItem('casoual-voted') || '{}');
+
+    // Mark already-voted buttons
+    Object.keys(votedGames).forEach(game => {
+      const btn = document.querySelector(`.game-card[data-game="${game}"] .vote-btn`);
+      if (btn) {
+        btn.classList.add('voted');
+        btn.innerHTML = '&#9829; <span class="vote-count" id="votes-' + game + '">0</span>';
+      }
+    });
+
+    // Fetch votes and sort cards
+    fetch(API)
+      .then(r => r.json())
+      .then(votes => {
+        // Update counts
+        Object.entries(votes).forEach(([game, count]) => {
+          const el = document.getElementById('votes-' + game);
+          if (el) el.textContent = count;
+        });
+
+        // Sort game cards by votes (descending), keep "coming soon" last
+        const container = document.getElementById('games');
+        const cards = [...container.children];
+        const playable = cards.filter(c => c.dataset.game);
+        const rest = cards.filter(c => !c.dataset.game);
+
+        playable.sort((a, b) => (votes[b.dataset.game] || 0) - (votes[a.dataset.game] || 0));
+        [...playable, ...rest].forEach(c => container.appendChild(c));
+      })
+      .catch(() => {}); // silently fail if API not ready
+
+    function vote(game, btn) {
+      if (votedGames[game]) return;
+
+      fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ game })
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.error) return;
+          btn.classList.add('voted');
+          btn.innerHTML = '&#9829; <span class="vote-count">' + data.votes + '</span>';
+          votedGames[game] = true;
+          localStorage.setItem('casoual-voted', JSON.stringify(votedGames));
+        })
+        .catch(() => {});
     }
   </script>
 
