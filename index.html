@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Casoual Games</title>
+  <meta name="description" content="Simple games, pure fun. Casual games by Casou.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      background: #0a0a0f;
+      color: #e8e8e8;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── FLOATING DOTS BACKGROUND ── */
+    .bg-dots {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .dot {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0;
+      animation: drift linear infinite;
+    }
+    @keyframes drift {
+      0% { opacity: 0; transform: translateY(100vh) scale(0); }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { opacity: 0; transform: translateY(-10vh) scale(1); }
+    }
+
+    /* ── LAYOUT ── */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 24px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── HEADER ── */
+    .logo {
+      font-size: clamp(48px, 12vw, 80px);
+      font-weight: 700;
+      letter-spacing: -2px;
+      margin-bottom: 8px;
+    }
+    .logo .dot-c { color: #ff6b6b; }
+    .logo .dot-a { color: #4ecdc4; }
+    .logo .dot-s { color: #ffd93d; }
+    .logo .dot-o { color: #a855f7; }
+    .logo .dot-u { color: #22c55e; }
+    .logo .dot-l { color: #ff922b; }
+
+    .tagline {
+      font-size: clamp(16px, 4vw, 22px);
+      opacity: 0.4;
+      font-weight: 400;
+      margin-bottom: 60px;
+    }
+
+    /* ── GAMES GRID ── */
+    .section-title {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      opacity: 0.3;
+      margin-bottom: 24px;
+    }
+
+    .games {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 60px;
+    }
+
+    .game-card {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 20px 24px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s, background 0.2s, border-color 0.2s;
+    }
+    .game-card:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .game-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .game-info h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .game-info p {
+      font-size: 14px;
+      opacity: 0.4;
+    }
+
+    .game-badge {
+      margin-left: auto;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(255, 107, 107, 0.15);
+      color: #ff6b6b;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .coming-soon {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    .coming-soon .game-badge {
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      opacity: 0.2;
+      font-size: 13px;
+      padding-bottom: 32px;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 480px) {
+      .game-card { padding: 16px 18px; }
+      .game-icon { width: 44px; height: 44px; font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating dots -->
+  <div class="bg-dots" id="bg"></div>
+
+  <div class="container">
+    <h1 class="logo">
+      <span class="dot-c">c</span><span class="dot-a">a</span><span class="dot-s">s</span><span class="dot-o">o</span><span class="dot-u">u</span><span class="dot-a">a</span><span class="dot-l">l</span>
+    </h1>
+    <p class="tagline">simple games, pure fun</p>
+
+    <p class="section-title">Our Games</p>
+
+    <div class="games">
+      <a href="https://boop.casoual.games" class="game-card">
+        <div class="game-icon" style="background: linear-gradient(135deg, #ff6b6b, #a855f7);">B!</div>
+        <div class="game-info">
+          <h3>Boop!</h3>
+          <p>Tap the right color. Stay alive.</p>
+        </div>
+        <span class="game-badge">PLAY</span>
+      </a>
+
+      <div class="game-card coming-soon">
+        <div class="game-icon" style="background: rgba(255,255,255,0.06);">?</div>
+        <div class="game-info">
+          <h3>Next game</h3>
+          <p>Something fun is cooking...</p>
+        </div>
+        <span class="game-badge">SOON</span>
+      </div>
+    </div>
+
+    <p class="footer">made by casou</p>
+  </div>
+
+  <script>
+    // Generate floating background dots
+    const colors = ['#ff6b6b', '#4ecdc4', '#ffd93d', '#a855f7', '#22c55e', '#ff922b'];
+    const bg = document.getElementById('bg');
+
+    for (let i = 0; i < 25; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      const size = 4 + Math.random() * 8;
+      dot.style.width = size + 'px';
+      dot.style.height = size + 'px';
+      dot.style.left = Math.random() * 100 + '%';
+      dot.style.background = colors[Math.floor(Math.random() * colors.length)];
+      dot.style.animationDuration = (8 + Math.random() * 12) + 's';
+      dot.style.animationDelay = (Math.random() * 15) + 's';
+      bg.appendChild(dot);
+    }
+  </script>
+
+</body>
+</html>
