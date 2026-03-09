@@ -2,7 +2,7 @@
 // GET /api/votes → returns all vote counts
 // POST /api/votes { game: "boop" } → vote for a game
 
-const GAMES = ['boop', 'stack', 'dash', 'drift', 'slice'];
+const GAMES = ['boop', 'stack', 'dash', 'drift', 'slice', 'dotrace'];
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
