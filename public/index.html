@@ -113,15 +113,16 @@
     }
 
     .game-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      font-weight: 700;
+      width: 64px;
+      height: 82px;
+      border-radius: 12px;
+      overflow: hidden;
       flex-shrink: 0;
+    }
+    .game-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .game-info h3 {
@@ -202,7 +203,7 @@
     /* ── MOBILE ── */
     @media (max-width: 480px) {
       .game-card { padding: 16px 18px; }
-      .game-icon { width: 44px; height: 44px; font-size: 20px; }
+      .game-icon { width: 52px; height: 68px; }
     }
   </style>
 </head>
@@ -221,7 +222,7 @@
 
     <div class="games" id="games">
       <div class="game-card" data-game="boop" data-href="https://boop.casoual.games">
-        <div class="game-icon" style="background: linear-gradient(135deg, #ff6b6b, #a855f7);">B!</div>
+        <div class="game-icon"><img src="/img/boop.jpg" alt="Boop!" loading="lazy"></div>
         <div class="game-info">
           <h3>Boop!</h3>
           <p>Tap the right color. Stay alive.</p>
@@ -233,7 +234,7 @@
       </div>
 
       <div class="game-card" data-game="stack" data-href="https://stack.casoual.games">
-        <div class="game-icon" style="background: linear-gradient(135deg, #4ecdc4, #22c55e);">S!</div>
+        <div class="game-icon"><img src="/img/stack.jpg" alt="Stack!" loading="lazy"></div>
         <div class="game-info">
           <h3>Stack!</h3>
           <p>Time your tap. Build the tower.</p>
@@ -245,7 +246,7 @@
       </div>
 
       <div class="game-card" data-game="dash" data-href="https://dash.casoual.games">
-        <div class="game-icon" style="background: linear-gradient(135deg, #4ecdc4, #22c55e);">D!</div>
+        <div class="game-icon"><img src="/img/dash.jpg" alt="Dash!" loading="lazy"></div>
         <div class="game-info">
           <h3>Dash!</h3>
           <p>Jump. Dodge. Survive the run.</p>
@@ -257,7 +258,7 @@
       </div>
 
       <div class="game-card" data-game="drift" data-href="https://drift.casoual.games">
-        <div class="game-icon" style="background: linear-gradient(135deg, #ff922b, #ffd93d);">D!</div>
+        <div class="game-icon"><img src="/img/drift.jpg" alt="Drift!" loading="lazy"></div>
         <div class="game-info">
           <h3>Drift!</h3>
           <p>Hold to turn. Stay on the road.</p>
@@ -269,7 +270,7 @@
       </div>
 
       <div class="game-card" data-game="slice" data-href="https://slice.casoual.games">
-        <div class="game-icon" style="background: linear-gradient(135deg, #a855f7, #ff6b6b);">S!</div>
+        <div class="game-icon"><img src="/img/slice.jpg" alt="Slice!" loading="lazy"></div>
         <div class="game-info">
           <h3>Slice!</h3>
           <p>Flip the blade. Cut them all.</p>
@@ -281,7 +282,7 @@
       </div>
 
       <div class="game-card" data-game="dotrace" data-href="https://dotrace.casoual.games">
-        <div class="game-icon" style="background: linear-gradient(135deg, #2a2a2a, #2563eb); color: #f8f6f0; font-size: 18px;">dt</div>
+        <div class="game-icon"><img src="/img/dotrace.jpg" alt="Dotrace!" loading="lazy"></div>
         <div class="game-info">
           <h3>Dotrace!</h3>
           <p>Place dots. Race the track. Plan ahead.</p>
@@ -293,7 +294,7 @@
       </div>
 
       <div class="game-card coming-soon">
-        <div class="game-icon" style="background: rgba(255,255,255,0.06);">?</div>
+        <div class="game-icon" style="background: rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700;">?</div>
         <div class="game-info">
           <h3>Next game</h3>
           <p>Something fun is cooking...</p>
